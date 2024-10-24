@@ -4,3 +4,5 @@
 
  The system will continuously retrieve weather data from the OpenWeatherMap API.
 
+# **Initial Page** 
+![Image Alt]()
