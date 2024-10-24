@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Monitoring App</title>
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(182, 218, 254);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1050px; /* Set a maximum width for the container */
+            margin: auto;
+            background: rgb(137, 190, 243);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.482);
+            overflow-x: auto; /* Enable horizontal scrolling if needed */
+        }
+
+        h1 {
+            text-align: center;
+        }
+        h5 {
+            font-size: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            white-space: nowrap;
+            
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        th:nth-child(1), td:nth-child(1) { width: 15%; } 
+        th:nth-child(2), td:nth-child(2) { width: 15%; } 
+        th:nth-child(3), td:nth-child(3) { width: 15%; } 
+        th:nth-child(4), td:nth-child(4) { width: 15%; } 
+        th:nth-child(5), td:nth-child(5) { width: 15%; }
+        th:nth-child(6), td:nth-child(6) { width: 15%; } 
+        th:nth-child(7), td:nth-child(7) { width: 15%; } 
+
+        button {
+            margin-top: 20px;
+            margin: 0 10px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer; 
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+        
+        .button-group {
+            display: flex; 
+            justify-content: space-evenly; 
+            width: 100%; 
+            margin-top: 10px;
+        }
+        
+        .bottom-footer {
+            position: fixed;
+            left: 0;        
+            bottom: 0;     
+            width: 100%;    
+            color: black;  
+            text-align: center;
+            padding-top :10px ;
+            font-size :15px ;
+        }
+
+        .social-icons {
+            display:flex ; 
+            justify-content:center ;
+            gap :35px ; 
+        }
+
+       .social-icons .icon {
+            font-size :35px ; 
+            color :#3f3f3f;
+        }
+
+       .social-icons .icon:hover {
+            color :#1e25d6 ; 
+            transform :scale(1.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Weather Monitoring System</h1>
+        
+        <table id="weatherTable">
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Temperature (°C)</th>
+                    <th>Can Vary To (°C)</th>
+                    <th>Avg Temp (°C)</th>
+                    <th>Max Temp (°C)</th>
+                    <th>Min Temp (°C)</th>
+                    <th>Dominant Condition</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="button-group">
+            <button id="refreshButton">Refresh Data</button>
+        </div>
+    </div>
+
+    <footer>
+        <!-- CONTACT -->
+        <div class="bottom-footer">
+            <div class="top-header">
+                <h5>Contact Me</h5>
+                <h1 class="title">Sharath M Talawar</h1>
+            </div>
+
+             <div class="social-icons">        
+                <a href="https://www.linkedin.com/in/sharath-m-talawar/" target="_blank" class="icon">
+                    <i class="uil uil-linkedin-alt"></i>
+                </a>
+                <a href="mailto:sarathmtalawar@gmail.com" target="_blank" class="icon">
+                    <i class="fas fa-envelope"></i>
+                </a>  
+                <a href="https://github.com/sharath816" target="_blank" class="icon">
+                    <i class="uil uil-github-alt"></i>
+                </a>
+             </div>
+         </div>
+     </footer>
+
+     <script>
+         const API_KEY = '5706c37456e260220d8267064dc585a6';
+         const CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad'];
+         const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather';
+         
+         // User-configurable thresholds
+         const thresholds = {
+           temperature :35,
+           condition :'Rain'
+        };
+ 
+       let alertTriggered = false;
+
+       // Daily summaries storage
+       let dailySummaries = {};
+       let currentDate = new Date().toLocaleDateString();
+
+       async function fetchWeather(city) {
+           const response = await fetch(`${BASE_URL}?q=${city}&appid=${API_KEY}&units=metric`);
+           
+           if (!response.ok) {
+               throw new Error('Failed to fetch weather data');
+           }
+           
+           return await response.json();
+       }
+
+       async function updateWeatherTable() {
+           const tbody = document.querySelector('#weatherTable tbody');
+           
+           // Clear existing rows
+           tbody.innerHTML = '';
+
+           for (const city of CITIES) {
+               try {
+                   const weatherData = await fetchWeather(city);
+                   const temperature = weatherData.main.temp;
+                   const feelsLike = weatherData.main.feels_like;
+                   const condition = weatherData.weather[0].main;
+
+                   // Store daily data
+                   if (!dailySummaries[city]) {
+                       dailySummaries[city] = { temperatures :[], conditions :[] };
+                   }
+                   dailySummaries[city].temperatures.push(temperature);
+                   dailySummaries[city].conditions.push(condition);
+
+                   // Check alert conditions
+                   if (temperature > thresholds.temperature && !alertTriggered) {
+                       console.warn(`Alert! ${city} temperature exceeds ${thresholds.temperature}°C.`);
+                       alertTriggered = true; // Prevent multiple alerts
+                       // Optionally send email notification here
+                   } else if (temperature <= thresholds.temperature) {
+                       alertTriggered = false; // Reset alert status if below threshold
+                   }
+
+                   // Prepare row data
+                   const rowData = calculateDailyAggregates(city);
+                   
+                   const row = `<tr>
+                                   <td>${city}</td>
+                                   <td>${temperature.toFixed(2)}°C</td>
+                                   <td>${feelsLike.toFixed(2)}°C</td>
+                                   <td>${rowData.averageTemp.toFixed(2)}°C</td>
+                                   <td>${rowData.maxTemp.toFixed(2)}°C</td>
+                                   <td>${rowData.minTemp.toFixed(2)}°C</td>
+                                   <td>${rowData.dominantCondition}</td>
+                                </tr>`;
+                   tbody.innerHTML += row;
+
+               } catch (error) {
+                   console.error(error);
+                   const row = `<tr><td colspan="7">Error fetching data for ${city}</td></tr>`;
+                   tbody.innerHTML += row;
+               }
+           }
+       }
+
+       function calculateDailyAggregates(city) {
+           const temps = dailySummaries[city].temperatures || [];
+           const conditions = dailySummaries[city].conditions || [];
+
+           const averageTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length || 0; // Avoid division by zero
+           const maxTemp = Math.max(...temps);
+           const minTemp = Math.min(...temps);
+
+           // Determine dominant condition
+           const conditionCounts = {};
+           conditions.forEach(cond => {
+               conditionCounts[cond] = (conditionCounts[cond] || 0)+ 1;
+           });
+           const dominantCondition = Object.keys(conditionCounts).reduce((a,b) => 
+               conditionCounts[a] > conditionCounts[b] ? a : b
+           );
+
+           return { averageTemp , maxTemp , minTemp , dominantCondition };
+       }
+
+       // Initial load
+       updateWeatherTable();
+
+       // Refresh button event listener
+       document.getElementById('refreshButton').addEventListener('click', updateWeatherTable);
+     </script>
+
+</body>
+
+</html>
