@@ -15,13 +15,13 @@
         }
 
         .container {
-            max-width: 1050px; /* Set a maximum width for the container */
+            max-width: 1050px; 
             margin: auto;
             background: rgb(137, 190, 243);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.482);
-            overflow-x: auto; /* Enable horizontal scrolling if needed */
+            overflow-x: auto; 
         }
 
         h1 {
@@ -136,7 +136,7 @@
     </div>
 
     <footer>
-        <!-- CONTACT -->
+        
         <div class="bottom-footer">
             <div class="top-header">
                 <h5>Contact Me</h5>
@@ -158,11 +158,11 @@
      </footer>
 
      <script>
-         const API_KEY = '5706c37456e260220d8267064dc585a6';
+         const API_KEY = 'Your API Key';
          const CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad'];
          const BASE_URL = 'http://api.openweathermap.org/data/2.5/weather';
          
-         // User-configurable thresholds
+         
          const thresholds = {
            temperature :35,
            condition :'Rain'
@@ -170,7 +170,7 @@
  
        let alertTriggered = false;
 
-       // Daily summaries storage
+       
        let dailySummaries = {};
        let currentDate = new Date().toLocaleDateString();
 
@@ -187,7 +187,7 @@
        async function updateWeatherTable() {
            const tbody = document.querySelector('#weatherTable tbody');
            
-           // Clear existing rows
+           
            tbody.innerHTML = '';
 
            for (const city of CITIES) {
@@ -197,23 +197,22 @@
                    const feelsLike = weatherData.main.feels_like;
                    const condition = weatherData.weather[0].main;
 
-                   // Store daily data
+                   
                    if (!dailySummaries[city]) {
                        dailySummaries[city] = { temperatures :[], conditions :[] };
                    }
                    dailySummaries[city].temperatures.push(temperature);
                    dailySummaries[city].conditions.push(condition);
 
-                   // Check alert conditions
+                   
                    if (temperature > thresholds.temperature && !alertTriggered) {
                        console.warn(`Alert! ${city} temperature exceeds ${thresholds.temperature}°C.`);
-                       alertTriggered = true; // Prevent multiple alerts
-                       // Optionally send email notification here
+                       alertTriggered = true; 
                    } else if (temperature <= thresholds.temperature) {
-                       alertTriggered = false; // Reset alert status if below threshold
+                       alertTriggered = false; 
                    }
 
-                   // Prepare row data
+                   
                    const rowData = calculateDailyAggregates(city);
                    
                    const row = `<tr>
@@ -239,11 +238,11 @@
            const temps = dailySummaries[city].temperatures || [];
            const conditions = dailySummaries[city].conditions || [];
 
-           const averageTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length || 0; // Avoid division by zero
+           const averageTemp = temps.reduce((sum, temp) => sum + temp, 0) / temps.length || 0; 
            const maxTemp = Math.max(...temps);
            const minTemp = Math.min(...temps);
 
-           // Determine dominant condition
+          
            const conditionCounts = {};
            conditions.forEach(cond => {
                conditionCounts[cond] = (conditionCounts[cond] || 0)+ 1;
@@ -255,10 +254,10 @@
            return { averageTemp , maxTemp , minTemp , dominantCondition };
        }
 
-       // Initial load
+      
        updateWeatherTable();
 
-       // Refresh button event listener
+       
        document.getElementById('refreshButton').addEventListener('click', updateWeatherTable);
      </script>
 
