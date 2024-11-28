@@ -14,7 +14,7 @@
 
 **Directs to the default browser with the page as you see below**
 
-**Don't forget to add your API key**
+**🔴Don't forget to add your API key**
 
 # **Before refreshing the page {Date 24/10/24 & Time 5:01PM}** 
 ![Image Alt](https://github.com/sharath816/Weather_Monitor/blob/e36dd9985dd171f884c216217515535016bccfc5/Screenshot%202024-10-24%20170106.png)
